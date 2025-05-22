@@ -148,5 +148,5 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialize the database on module import
+# Initialize the database
 init_db() 

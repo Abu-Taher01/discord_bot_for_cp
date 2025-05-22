@@ -80,12 +80,12 @@ A Discord bot for tracking Codeforces progress, managing contests, and maintaini
 
 - `!cf set <handle>` - Set your Codeforces handle
 - `!cf stats` - View your problem-solving statistics
-- `!contest create <name> <duration>` - Create a new contest
-- `!contest join <contest_id>` - Join a contest
+- `!contest create <name> <duration in minute> min_rating max_rating` - Create a new contest
+- `!joincontest <contest_id>` - Join a contest
 - `!contest list` - List active contests
 - `!goal set <number>` - Set daily problem-solving goal
 - `!goal status` - Check goal completion status
-- `!rank` - View current rankings
+- `!rating` - View current rankings
 - `!help` - View all available commands
 
 ## Support

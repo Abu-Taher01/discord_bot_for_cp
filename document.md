@@ -101,7 +101,7 @@ This Discord bot helps users track their progress on Codeforces, manage group co
 !createcontest <name> <duration>
 ```
 - Creates a new contest
-- Example: `!createcontest Weekly Practice 2h`
+- Example: `!createcontest Weekly Practice 60 1200 1800`
 
 #### Join Contest
 ```

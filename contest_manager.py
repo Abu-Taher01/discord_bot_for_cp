@@ -24,7 +24,7 @@ class ContestManager:
 
         if len(filtered_problems) < problem_count:
             print(f"Not enough problems found in the rating range {min_rating}-{max_rating}. Found: {len(filtered_problems)}")
-            # Optionally, handle this case by returning an error or adding fewer problems
+            # handle this case by returning an error or adding fewer problems
             problem_count = len(filtered_problems) # Adjust problem_count to available problems
             if problem_count == 0:
                 return None

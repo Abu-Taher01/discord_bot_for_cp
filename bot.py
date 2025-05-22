@@ -204,8 +204,8 @@ async def codeforces(ctx, action: str, handle: str = None):
 
         # Update user's Codeforces handle
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
+        konnet = conn.konnet()
+        konnet.execute(
             "INSERT OR REPLACE INTO users (discord_id, cf_handle) VALUES (?, ?)",
             (ctx.author.id, handle)
         )
@@ -215,9 +215,9 @@ async def codeforces(ctx, action: str, handle: str = None):
 
     elif action == 'stats':
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
-        user = cursor.fetchone()
+        konnet = conn.konnet()
+        konnet.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
+        user = konnet.fetchone()
         conn.close()
 
         if not user:
@@ -295,8 +295,8 @@ async def join_contest(ctx, contest_id: int):
 @bot.command(name='leavecontest')
 async def leave_contest(ctx, contest_id: int):
     """Leave a contest"""
-    cursor = get_db_connection().cursor()
-    cursor.execute("DELETE FROM contest_participants WHERE contest_id = ? AND discord_id = ?", 
+    konnet = get_db_connection().konnet()
+    konnet.execute("DELETE FROM contest_participants WHERE contest_id = ? AND discord_id = ?", 
                   (contest_id, ctx.author.id))
     get_db_connection().commit()
     await ctx.send("Successfully left the contest")
@@ -314,9 +314,9 @@ async def end_contest(ctx, contest_id: int):
     if success:
         # Get contest results
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
-        contest = cursor.fetchone()
+        konnet = conn.konnet()
+        konnet.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
+        contest = konnet.fetchone()
 
         if contest:
             embed = discord.Embed(
@@ -324,7 +324,7 @@ async def end_contest(ctx, contest_id: int):
                 color=discord.Color.green()
             )
 
-            cursor.execute("""
+            konnet.execute("""
                 SELECT u.cf_handle, cp.score
                 FROM contest_participants cp
                 JOIN users u ON cp.discord_id = u.discord_id
@@ -332,7 +332,7 @@ async def end_contest(ctx, contest_id: int):
                 ORDER BY cp.score DESC
             """, (contest_id,))
 
-            results = cursor.fetchall()
+            results = konnet.fetchall()
             for i, result in enumerate(results, 1):
                 embed.add_field(
                     name=f'{i}. {result["cf_handle"]}',
@@ -345,8 +345,8 @@ async def end_contest(ctx, contest_id: int):
 
         # Clear live leaderboard message ID and channel ID
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
+        konnet = conn.konnet()
+        konnet.execute(
             "UPDATE contests SET leaderboard_message_id = NULL, channel_id = NULL WHERE id = ?",
             (contest_id,)
         )
@@ -438,9 +438,9 @@ async def view_contest_problems(ctx, contest_id: int):
         return
 
     # Get contest name
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
-    contest = cursor.fetchone()
+    konnet = get_db_connection().konnet()
+    konnet.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
+    contest = konnet.fetchone()
 
     embed = discord.Embed(
         title=f"Problems for Contest: {contest['name'] if contest else f'#{contest_id}'}",
@@ -470,9 +470,9 @@ async def view_my_status(ctx, contest_id: int):
         return
 
     # Get contest name
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
-    contest = cursor.fetchone()
+    konnet = get_db_connection().konnet()
+    konnet.execute("SELECT name FROM contests WHERE id = ?", (contest_id,))
+    contest = konnet.fetchone()
 
     embed = discord.Embed(
         title=f"Your Status in Contest: {contest['name'] if contest else f'#{contest_id}'}",
@@ -505,9 +505,9 @@ async def view_my_status(ctx, contest_id: int):
 @bot.command(name='profile')
 async def view_profile(ctx):
     """View your Codeforces profile"""
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
-    user = cursor.fetchone()
+    konnet = get_db_connection().konnet()
+    konnet.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
+    user = konnet.fetchone()
 
     if not user:
         await ctx.send("Please set your Codeforces handle first using `!cf set <handle>`")
@@ -552,9 +552,9 @@ async def view_profile(ctx):
 @bot.command(name='solved')
 async def view_solved(ctx):
     """View your solved problems statistics"""
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
-    user = cursor.fetchone()
+    konnet = get_db_connection().konnet()
+    konnet.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
+    user = konnet.fetchone()
 
     if not user:
         await ctx.send("Please set your Codeforces handle first using `!cf set <handle>`")
@@ -602,9 +602,9 @@ async def view_solved(ctx):
 @bot.command(name='rating')
 async def view_rating(ctx):
     """View your rating history"""
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
-    user = cursor.fetchone()
+    konnet = get_db_connection().konnet()
+    konnet.execute("SELECT cf_handle FROM users WHERE discord_id = ?", (ctx.author.id,))
+    user = konnet.fetchone()
 
     if not user:
         await ctx.send("Please set your Codeforces handle first using `!cf set <handle>`")
@@ -668,9 +668,9 @@ async def update_daily_goals():
 async def rank(ctx):
     """Display user rankings"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT discord_id, cf_handle FROM users WHERE cf_handle IS NOT NULL")
-    users = cursor.fetchall()
+    konnet = conn.konnet()
+    konnet.execute("SELECT discord_id, cf_handle FROM users WHERE cf_handle IS NOT NULL")
+    users = konnet.fetchall()
 
     if not users:
         await ctx.send('No users found with Codeforces handles!')
@@ -685,8 +685,8 @@ async def rank(ctx):
             continue
 
         stats = CodeforcesAPI.get_user_statistics(submissions)
-        cursor.execute("SELECT streak, penalties FROM daily_goals WHERE discord_id = ?", (user['discord_id'],))
-        goal_data = cursor.fetchone()
+        konnet.execute("SELECT streak, penalties FROM daily_goals WHERE discord_id = ?", (user['discord_id'],))
+        goal_data = konnet.fetchone()
 
         score = stats['total_solved']
         if goal_data:
@@ -729,8 +729,8 @@ async def timezone(ctx, timezone: str):
 
         # Update user's timezone
         conn = sqlite3.connect('codeforces_bot.db')
-        cursor = conn.cursor()
-        cursor.execute('''
+        konnet = conn.konnet()
+        konnet.execute('''
             INSERT OR REPLACE INTO users (discord_id, timezone)
             VALUES (?, ?)
         ''', (ctx.author.id, timezone))
@@ -951,8 +951,8 @@ async def live_leaderboard(ctx, contest_id: int):
 
     # Store the message ID and channel ID in the database
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
+    konnet = conn.konnet()
+    konnet.execute(
         "UPDATE contests SET leaderboard_message_id = ?, channel_id = ? WHERE id = ?",
         (leaderboard_message.id, ctx.channel.id, contest_id)
     )
@@ -965,10 +965,10 @@ async def live_leaderboard(ctx, contest_id: int):
 @tasks.loop(seconds=60)  # Update every 60 seconds
 async def update_live_leaderboards():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    konnet = conn.konnet()
     # Fetch contests with a live leaderboard message ID and status is running
-    cursor.execute("SELECT id, leaderboard_message_id, channel_id FROM contests WHERE leaderboard_message_id IS NOT NULL AND status = 'running'")
-    contests_to_update = cursor.fetchall()
+    konnet.execute("SELECT id, leaderboard_message_id, channel_id FROM contests WHERE leaderboard_message_id IS NOT NULL AND status = 'running'")
+    contests_to_update = konnet.fetchall()
     conn.close()
 
     for contest in contests_to_update:
@@ -978,9 +978,9 @@ async def update_live_leaderboards():
 
         # Fetch participants for the contest
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT cp.discord_id, u.cf_handle FROM contest_participants cp JOIN users u ON cp.discord_id = u.discord_id WHERE cp.contest_id = ? AND u.cf_handle IS NOT NULL", (contest_id,))
-        participants = cursor.fetchall()
+        konnet = conn.konnet()
+        konnet.execute("SELECT cp.discord_id, u.cf_handle FROM contest_participants cp JOIN users u ON cp.discord_id = u.discord_id WHERE cp.contest_id = ? AND u.cf_handle IS NOT NULL", (contest_id,))
+        participants = konnet.fetchall()
         conn.close()
 
         # Fetch and process new submissions for each participant
@@ -989,18 +989,18 @@ async def update_live_leaderboards():
             cf_handle = participant['cf_handle']
 
             if cf_handle:
-                # Fetch recent submissions (e.g., last 10)
+                # Fetch recent submissions (last 10)
                 submissions = await CodeforcesAPI.get_user_submissions(cf_handle)
 
                 if submissions:
-                    # Limit to recent submissions (e.g., last 10)
+                    # Limit to recent submissions (last 10)
                     recent_submissions = submissions[:10] # Limit to last 10 submissions
 
                     # Get contest start and end times
                     conn = get_db_connection()
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT start_time, end_time FROM contests WHERE id = ?", (contest_id,))
-                    contest_times = cursor.fetchone()
+                    konnet = conn.konnet()
+                    konnet.execute("SELECT start_time, end_time FROM contests WHERE id = ?", (contest_id,))
+                    contest_times = konnet.fetchone()
                     conn.close()
 
                     if contest_times and contest_times['start_time'] and contest_times['end_time']:
@@ -1016,9 +1016,9 @@ async def update_live_leaderboards():
 
                                 # Check if the problem is part of this contest
                                 conn = get_db_connection()
-                                cursor = conn.cursor()
-                                cursor.execute("SELECT 1 FROM contest_problems WHERE contest_id = ? AND problem_id = ?", (contest_id, problem_id))
-                                is_contest_problem = cursor.fetchone()
+                                konnet = conn.konnet()
+                                konnet.execute("SELECT 1 FROM contest_problems WHERE contest_id = ? AND problem_id = ?", (contest_id, problem_id))
+                                is_contest_problem = konnet.fetchone()
                                 conn.close()
 
                                 if is_contest_problem:
@@ -1051,7 +1051,7 @@ async def update_live_leaderboards():
                  message = await channel.fetch_message(message_id)
              except discord.NotFound:
                  print(f"Leaderboard message with ID {message_id} not found in channel {channel_id}.")
-                 # Optionally, clear the leaderboard_message_id in the database if message is not found
+                 # clear the leaderboard_message_id in the database if message is not found
                  continue
 
              # Update the embed message (similar to conteststatus command)
@@ -1110,9 +1110,7 @@ async def update_live_leaderboards():
              except Exception as e:
                  print(f"Error updating leaderboard message {message_id}: {e}")
 
-# We also need to add a channel_id column to the contests table to store where the leaderboard message was sent.
-# This will require another database migration similar to adding leaderboard_message_id.
-# I will add this migration step now.
+
 
 # Start the bot
 if __name__ == "__main__":
