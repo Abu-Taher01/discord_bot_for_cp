@@ -17,7 +17,7 @@ __pycache__/
 
 # Logs
 *.log
-
+# 
 # Local development
 .DS_Store
 Thumbs.db 
